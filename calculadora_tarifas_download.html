@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calculadora de Tarifas · Lystos</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Tarifas Lystos" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a1a2e'/%3E%3Crect x='0' y='0' width='8' height='180' rx='4' fill='%23e94560'/%3E%3Ctext x='100' y='105' text-anchor='middle' font-family='system-ui' font-weight='900' font-size='56' fill='white'%3E€%3C/text%3E%3C/svg%3E" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --c1: #1b4f72; --c2: #145a32; --cv: #6c3483;
+    --dark: #1a1a2e; --accent: #e94560;
+    --bg: #f0f3f8; --white: #ffffff;
+    --gray: #eaecee; --text: #1a1a2e;
+    --muted: #888; --border: #e0e0e0;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); padding-bottom: 48px; }
+
+  .header { background: var(--dark); padding: 0 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 16px rgba(0,0,0,.35); }
+  .header-bar { width: 4px; height: 34px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+  .header-text { padding: 15px 0; flex: 1; }
+  .header-title { color: #fff; font-weight: 800; font-size: 19px; letter-spacing: -.3px; }
+  .header-sub   { color: rgba(255,255,255,.38); font-size: 11px; margin-top: 2px; }
+  .stripe { height: 3px; background: linear-gradient(90deg,#e94560,#1b4f72,#145a32,#6c3483); }
+
+  .btn-edit { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid rgba(255,255,255,.2); border-radius: 9px; background: rgba(255,255,255,.07); color: rgba(255,255,255,.8); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .18s; white-space: nowrap; }
+  .btn-edit:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); color: #fff; }
+
+  .mode-bar { max-width: 1140px; margin: 20px auto 0; padding: 0 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mode-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .7px; text-transform: uppercase; }
+  .toggle-group { display: flex; background: #fff; border-radius: 10px; padding: 4px; gap: 3px; box-shadow: 0 1px 8px rgba(0,0,0,.08); }
+  .toggle-btn { padding: 7px 15px; border: none; border-radius: 7px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .18s; background: transparent; color: var(--muted); }
+  .toggle-btn.active { background: var(--dark); color: #fff; }
+  .toggle-btn:hover:not(.active) { background: var(--gray); color: var(--text); }
+
+  .grid { max-width: 1140px; margin: 16px auto 0; padding: 0 16px; display: grid; gap: 16px; }
+  .grid.mode-1 { grid-template-columns: minmax(0,520px); justify-content: center; }
+  .grid.mode-2 { grid-template-columns: 1fr 1fr; }
+  .grid.mode-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.07); display: flex; flex-direction: column; animation: fadeUp .3s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .card-header { padding: 15px 20px; }
+  .card-title { color: #fff; font-weight: 800; font-size: 15px; }
+  .card-sub   { color: rgba(255,255,255,.5); font-size: 11px; margin-top: 3px; }
+
+  .inputs { padding: 15px 20px; display: flex; flex-direction: column; gap: 10px; }
+  .field-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .9px; text-transform: uppercase; margin-bottom: 4px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  select, input[type=number] { width: 100%; padding: 9px 11px; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text); outline: none; transition: border-color .18s; }
+  select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+  input[type=number]::-webkit-inner-spin-button { opacity: .5; }
+
+  .div { height: 1px; background: var(--border); margin: 0 20px; }
+  .detail { padding: 10px 20px; display: flex; flex-direction: column; gap: 5px; }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+  .detail-row .lbl { color: var(--muted); }
+  .detail-row .val { font-weight: 700; }
+  .saving-box { margin-top: 4px; background: #eafaf1; border-radius: 9px; padding: 7px 10px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #27ae60; }
+
+  .total-box { margin: 10px 20px 20px; border-radius: 13px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+  .total-lbl { color: rgba(255,255,255,.8); font-weight: 700; font-size: 12px; letter-spacing: .5px; }
+  .total-val { color: #fff; font-weight: 800; font-size: 22px; }
+
+  .legend { margin: 12px 20px 0; background: rgba(108,52,131,.06); border: 1px solid rgba(108,52,131,.18); border-radius: 10px; padding: 9px 12px; font-size: 11px; color: #555; line-height: 1.8; }
+  .compare-fields { padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .cmp-field { padding: 8px 11px; border-radius: 8px; font-size: 13px; min-height: 36px; display: flex; align-items: center; }
+  .diff-green { color: #27ae60; font-weight: 700; }
+  .diff-red   { color: #e74c3c; font-weight: 700; }
+  .diff-gray  { color: #aaa; font-style: italic; }
+
+  /* MODAL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,30,.6); z-index: 500; backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+  .overlay.open { display: flex; }
+  .tarifas-panel { background: #fff; border-radius: 20px; width: 100%; max-width: 820px; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: popIn .22s ease; }
+  @keyframes popIn { from { opacity:0; transform:scale(.93); } to { opacity:1; transform:scale(1); } }
+  .panel-header { background: var(--dark); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .panel-title { color: #fff; font-weight: 800; font-size: 17px; }
+  .panel-sub   { color: rgba(255,255,255,.38); font-size: 11px; margin-top: 3px; }
+  .panel-stripe { height: 3px; background: linear-gradient(90deg,#e94560,#1b4f72,#145a32,#6c3483); flex-shrink: 0; }
+  .btn-close { background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.7); width: 32px; height: 32px; border-radius: 8px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .btn-close:hover { background: rgba(255,255,255,.2); color: #fff; }
+  .panel-body { overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+
+  .tarifa-section {}
+  .tarifa-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .tarifa-badge { padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: .4px; }
+
+  .tarifa-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tarifa-table th { background: var(--gray); padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .7px; text-transform: uppercase; }
+  .tarifa-table th:first-child { border-radius: 8px 0 0 8px; }
+  .tarifa-table th:last-child  { border-radius: 0 8px 8px 0; }
+  .tarifa-table td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
+  .tarifa-table tr:last-child td { border-bottom: none; }
+  .tarifa-table tr:hover td { background: #fafafa; }
+  .tarifa-table input { width: 68px; padding: 5px 6px; border: 1.5px solid #e0e0e0; border-radius: 7px; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--text); text-align: center; outline: none; transition: border-color .15s; }
+  .tarifa-table input:focus { border-color: var(--accent); }
+  .del-btn { background: none; border: none; color: #ccc; font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 5px; transition: all .15s; line-height: 1; }
+  .del-btn:hover { color: #e74c3c; background: #fdecea; }
+  .add-row-btn { margin-top: 8px; width: 100%; padding: 8px; background: none; border: 1.5px dashed #ddd; border-radius: 9px; font-family: inherit; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .15s; }
+  .add-row-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff5f6; }
+
+  .global-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .global-grid input { width: 100%; padding: 9px 11px; border: 1.5px solid #ddd; border-radius: 9px; font-family: inherit; font-size: 14px; font-weight: 700; outline: none; transition: border-color .15s; }
+  .global-grid input:focus { border-color: var(--accent); }
+
+  .panel-footer { padding: 15px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: #fafafa; gap: 10px; }
+  .save-hint { font-size: 11px; color: var(--muted); }
+  .btn-primary { padding: 10px 24px; background: var(--accent); border: none; border-radius: 10px; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .18s; }
+  .btn-primary:hover { background: #c0392b; }
+  .btn-secondary { padding: 10px 16px; background: none; border: 1.5px solid #ddd; border-radius: 10px; color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s; }
+  .btn-secondary:hover { border-color: #999; color: var(--text); }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1a1a2e; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transition: all .28s; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,.25); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .footer-note { text-align: center; color: #aab; font-size: 11px; margin-top: 12px; }
+
+  @media (max-width: 700px) {
+    .grid.mode-2, .grid.mode-3 { grid-template-columns: 1fr; }
+    .global-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-bar"></div>
+  <div class="header-text">
+    <div class="header-title">Calculadora de Tarifas</div>
+    <div class="header-sub">LYSTOS · Agency &amp; Premium · Estándar + REMAX</div>
+  </div>
+  <button class="btn-edit" onclick="openPanel()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Editar tarifas
+  </button>
+</div>
+<div class="stripe"></div>
+
+<div class="mode-bar">
+  <span class="mode-label">Vista:</span>
+  <div class="toggle-group">
+    <button class="toggle-btn" data-mode="1" onclick="setMode(1)">1 escenario</button>
+    <button class="toggle-btn active" data-mode="2" onclick="setMode(2)">2 escenarios</button>
+    <button class="toggle-btn" data-mode="3" onclick="setMode(3)">Comparativa</button>
+  </div>
+</div>
+
+<div class="grid mode-2" id="grid">
+
+  <!-- Escenario 1 -->
+  <div class="card" id="card1" style="border:2px solid rgba(27,79,114,.22)">
+    <div class="card-header" style="background:#1b4f72">
+      <div class="card-title">Escenario 1</div>
+      <div class="card-sub" id="sub1"></div>
+    </div>
+    <div class="inputs">
+      <div><div class="field-label">Tipo licencia A</div>
+        <select id="s1_tipoA" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
+          <option>Agency</option><option>Premium</option></select></div>
+      <div><div class="field-label">Tipo licencia B</div>
+        <select id="s1_tipoB" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
+          <option>Agency</option><option selected>Premium</option><option>Ninguna</option></select></div>
+      <div class="field-row">
+        <div><div class="field-label">Cant. A</div>
+          <input type="number" id="s1_qtyA" value="7" min="0" max="500" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)"></div>
+        <div><div class="field-label">Cant. B</div>
+          <input type="number" id="s1_qtyB" value="1" min="0" max="500" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)"></div>
+      </div>
+      <div><div class="field-label">Contrato</div>
+        <select id="s1_contrato" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
+          <option>Mensual</option><option>Semestral</option><option selected>Anual</option></select></div>
+      <div><div class="field-label">Acuerdo</div>
+        <select id="s1_acuerdo" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
+          <option selected>No</option><option>REMAX</option></select></div>
+    </div>
+    <div class="div"></div>
+    <div class="detail" id="detail1"></div>
+    <div class="div"></div>
+    <div class="detail" id="subtotals1"></div>
+    <div class="total-box" style="background:#1b4f72">
+      <span class="total-lbl">TOTAL</span><span class="total-val" id="total1">—</span>
+    </div>
+  </div>
+
+  <!-- Escenario 2 -->
+  <div class="card" id="card2" style="border:2px solid rgba(20,90,50,.22)">
+    <div class="card-header" style="background:#145a32">
+      <div class="card-title">Escenario 2</div>
+      <div class="card-sub" id="sub2"></div>
+    </div>
+    <div class="inputs">
+      <div><div class="field-label">Tipo licencia A</div>
+        <select id="s2_tipoA" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
+          <option>Agency</option><option>Premium</option></select></div>
+      <div><div class="field-label">Tipo licencia B</div>
+        <select id="s2_tipoB" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
+          <option>Agency</option><option selected>Premium</option><option>Ninguna</option></select></div>
+      <div class="field-row">
+        <div><div class="field-label">Cant. A</div>
+          <input type="number" id="s2_qtyA" value="10" min="0" max="500" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)"></div>
+        <div><div class="field-label">Cant. B</div>
+          <input type="number" id="s2_qtyB" value="1" min="0" max="500" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)"></div>
+      </div>
+      <div><div class="field-label">Contrato</div>
+        <select id="s2_contrato" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
+          <option>Mensual</option><option>Semestral</option><option selected>Anual</option></select></div>
+      <div><div class="field-label">Acuerdo</div>
+        <select id="s2_acuerdo" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
+          <option>No</option><option selected>REMAX</option></select></div>
+    </div>
+    <div class="div"></div>
+    <div class="detail" id="detail2"></div>
+    <div class="div"></div>
+    <div class="detail" id="subtotals2"></div>
+    <div class="total-box" style="background:#145a32">
+      <span class="total-lbl">TOTAL</span><span class="total-val" id="total2">—</span>
+    </div>
+  </div>
+
+  <!-- Variable -->
+  <div class="card" id="cardVar" style="display:none;border:2px solid rgba(108,52,131,.22)">
+    <div class="card-header" style="background:#6c3483">
+      <div class="card-title">Variable</div>
+      <div class="card-sub">Escenario 1 − Escenario 2</div>
+    </div>
+    <div class="legend">
+      <span class="diff-green">Verde</span> = Esc. 1 más barato &nbsp;·&nbsp;
+      <span class="diff-red">Rojo</span> = Esc. 1 más caro
+    </div>
+    <div class="compare-fields" id="varFields"></div>
+    <div class="div"></div>
+    <div class="detail" id="varDetail"></div>
+    <div class="total-box" style="background:#6c3483">
+      <span class="total-lbl">DIFERENCIA TOTAL</span>
+      <span class="total-val" id="totalVar">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">Precios en € sin IVA &nbsp;·&nbsp; IVA 21% incluido en TOTAL &nbsp;·&nbsp; Semestral = precio/lic × qty × 6 meses</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="tarifas-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">✏️ Editar Tarifas</div>
+        <div class="panel-sub">Cambios aplicados al instante · Guardados automáticamente en este dispositivo</div>
+      </div>
+      <button class="btn-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-stripe"></div>
+    <div class="panel-body" id="panelBody"></div>
+    <div class="panel-footer">
+      <span class="save-hint">💾 Guardado en tu navegador</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" onclick="resetTarifas()">↺ Restaurar originales</button>
+        <button class="btn-primary" onclick="closePanel()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Tarifa actualizada</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// TARIFAS ORIGINALES
+// Estándar: cada tramo tiene { min, max, mes, sem, ano }
+// REMAX:    cada tramo tiene { min, max, mes, sem, ano }
+// ─────────────────────────────────────────────────────────────────────────────
+const ORIG = {
+  agency: [
+    {min:1,  max:1,   mes:79, sem:55, ano:40},
+    {min:2,  max:3,   mes:55, sem:45, ano:35},
+    {min:4,  max:4,   mes:43, sem:40, ano:25},
+    {min:5,  max:5,   mes:43, sem:38, ano:25},
+    {min:6,  max:9,   mes:43, sem:38, ano:22},
+    {min:10, max:14,  mes:40, sem:32, ano:20},
+    {min:15, max:9999,mes:38, sem:28, ano:16},
+  ],
+  premium: [
+    {min:1,  max:1,   mes:199, sem:149, ano:100},
+    {min:2,  max:2,   mes:120, sem:99,  ano:78},
+    {min:3,  max:3,   mes:108, sem:86,  ano:65},
+    {min:4,  max:4,   mes:108, sem:65,  ano:55},
+    {min:5,  max:9999,mes:95,  sem:60,  ano:49},
+  ],
+  // REMAX escalado
+  rmAgn: [
+    {min:1,  max:4,   mes:39,  sem:null, ano:31},
+    {min:5,  max:15,  mes:31,  sem:26,   ano:22},
+    {min:16, max:30,  mes:26,  sem:22,   ano:19},
+    {min:31, max:45,  mes:22,  sem:19,   ano:16},
+    {min:46, max:60,  mes:18,  sem:15,   ano:13},
+    {min:61, max:9999,mes:15,  sem:13,   ano:11},
+  ],
+  rmPre: [
+    {min:1,  max:4,   mes:66,  sem:56,   ano:48},
+    {min:5,  max:15,  mes:56,  sem:48,   ano:41},
+    {min:16, max:30,  mes:48,  sem:41,   ano:34},
+    {min:31, max:45,  mes:41,  sem:34,   ano:29},
+    {min:46, max:60,  mes:34,  sem:29,   ano:25},
+    {min:61, max:9999,mes:29,  sem:25,   ano:21},
+  ],
+  iva: 21,
+};
+
+function loadT() {
+  try { const s=localStorage.getItem('lystos_t3'); if(s) return JSON.parse(s); } catch(e){}
+  return JSON.parse(JSON.stringify(ORIG));
+}
+function saveT() {
+  try { localStorage.setItem('lystos_t3', JSON.stringify(T)); } catch(e){}
+  showToast(); render();
+}
+function resetTarifas() {
+  if (!confirm('¿Restaurar todas las tarifas a los valores originales?')) return;
+  T = JSON.parse(JSON.stringify(ORIG));
+  saveT(); buildPanel();
+}
+let T = loadT();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRICING ENGINE
+// contrato: 'Mensual' | 'Semestral' | 'Anual'
+// Devuelve precio POR LICENCIA POR MES (para el display de detalle)
+// El total se multiplica por qty y por los meses del período
+// ─────────────────────────────────────────────────────────────────────────────
+function getPriceLic(tipo, qty, acuerdo, contrato) {
+  if (!qty||qty<=0||!tipo||tipo==='Ninguna') return 0;
+  const tiers = acuerdo==='REMAX'
+    ? (tipo==='Agency'?T.rmAgn : tipo==='Premium'?T.rmPre : null)
+    : (tipo==='Agency'?T.agency: tipo==='Premium'?T.premium: null);
+  if (!tiers) return 0;
+  for (const t of tiers) {
+    if (qty>=t.min && qty<=t.max) {
+      if (contrato==='Mensual')   return t.mes;
+      if (contrato==='Semestral') return t.sem !== null ? t.sem : t.mes; // fallback a mes si null
+      if (contrato==='Anual')     return t.ano;
+    }
+  }
+  return 0;
+}
+
+function meses(contrato) {
+  if (contrato==='Mensual')   return 1;
+  if (contrato==='Semestral') return 6;
+  if (contrato==='Anual')     return 12;
+  return 1;
+}
+
+function calcS(s) {
+  const qa=+s.qtyA||0, qb=+s.qtyB||0;
+  const hasB = s.tipoB!=='Ninguna'&&qb>0;
+  const pA = getPriceLic(s.tipoA, qa, s.acuerdo, s.contrato);
+  const pB = hasB ? getPriceLic(s.tipoB, qb, s.acuerdo, s.contrato) : 0;
+  // precio mensual para referencia
+  const pAm = getPriceLic(s.tipoA, qa, s.acuerdo, 'Mensual');
+  const pBm = hasB ? getPriceLic(s.tipoB, qb, s.acuerdo, 'Mensual') : 0;
+  const mensualRef = qa*pAm + (hasB?qb*pBm:0);
+
+  const m = meses(s.contrato);
+  const sub = (qa*pA + (hasB?qb*pB:0)) * m;
+  const iva  = sub*(T.iva/100);
+  // ahorro vs pagar mensual el mismo periodo
+  const ahorro = m>1 ? mensualRef*m - sub : 0;
+
+  return {pA, pB, mensualRef, sub, iva, total:sub+iva, ahorro, m};
+}
+
+const eur = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n);
+function diffHtml(v, money=true) {
+  if (money&&Math.abs(v)<0.005) return '<span class="diff-gray">—</span>';
+  if (!money&&v===0) return '<span class="diff-gray">—</span>';
+  const cls = v>0?'diff-red':'diff-green';
+  return `<span class="${cls}">${v>0?'+':''}${money?eur(v):v}</span>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────────────────────
+function readS(n) {
+  const g=id=>document.getElementById(`s${n}_${id}`);
+  return {tipoA:g('tipoA').value, tipoB:g('tipoB').value,
+    qtyA:+g('qtyA').value||0, qtyB:+g('qtyB').value||0,
+    contrato:g('contrato').value, acuerdo:g('acuerdo').value};
+}
+
+function render() {
+  const s1=readS(1), s2=readS(2);
+  const r1=calcS(s1), r2=calcS(s2);
+
+  document.getElementById('sub1').textContent=`${s1.contrato} · ${s1.acuerdo==='REMAX'?'Acuerdo REMAX':'Sin acuerdo'}`;
+  document.getElementById('sub2').textContent=`${s2.contrato} · ${s2.acuerdo==='REMAX'?'Acuerdo REMAX':'Sin acuerdo'}`;
+
+  function rs(r, s, sfx, c) {
+    const periodoLabel = s.contrato==='Mensual'?'mes':s.contrato==='Semestral'?'semestre':'año';
+    document.getElementById('detail'+sfx).innerHTML=`
+      <div class="detail-row"><span class="lbl">€/lic A · ${periodoLabel}</span><span class="val" style="color:${c}">${eur(r.pA)}</span></div>
+      <div class="detail-row"><span class="lbl">€/lic B · ${periodoLabel}</span><span class="val" style="color:${c}">${eur(r.pB)}</span></div>
+      <div class="detail-row"><span class="lbl">Ref. mensual equiv.</span><span class="val" style="color:${c}">${eur(r.mensualRef)}/mes</span></div>
+      ${r.ahorro>0?`<div class="saving-box"><span>Ahorro vs pago mensual</span><span>${eur(r.ahorro)}</span></div>`:''}
+    `;
+    document.getElementById('subtotals'+sfx).innerHTML=`
+      <div class="detail-row"><span class="lbl">Subtotal sin IVA (${r.m} mes${r.m>1?'es':''})</span><span class="val">${eur(r.sub)}</span></div>
+      <div class="detail-row"><span class="lbl">IVA (${T.iva}%)</span><span class="val">${eur(r.iva)}</span></div>
+    `;
+    document.getElementById('total'+sfx).textContent = eur(r.total);
+  }
+  rs(r1,s1,'1','#1b4f72');
+  rs(r2,s2,'2','#145a32');
+
+  // Variable
+  const fields=[
+    ['Tipo lic. A', s1.tipoA,    s2.tipoA,    false],
+    ['Tipo lic. B', s1.tipoB,    s2.tipoB,    false],
+    ['Cantidad A',  s1.qtyA,     s2.qtyA,     true],
+    ['Cantidad B',  s1.qtyB,     s2.qtyB,     true],
+    ['Contrato',    s1.contrato, s2.contrato, false],
+    ['Acuerdo',     s1.acuerdo,  s2.acuerdo,  false],
+  ];
+  document.getElementById('varFields').innerHTML = fields.map(([l,v1,v2,n])=>{
+    const eq=String(v1)===String(v2);
+    const val=eq
+      ?`<span class="diff-gray">Igual (${v1})</span>`
+      :n?diffHtml(+v1-+v2,false)
+      :`<span style="color:#1b4f72;font-weight:700">${v1}</span><span style="color:#ccc;margin:0 6px;font-size:11px">vs</span><span style="color:#145a32;font-weight:700">${v2}</span>`;
+    return `<div><div class="field-label">${l}</div><div class="cmp-field" style="background:rgba(108,52,131,.06);border:1.5px solid rgba(108,52,131,.18)">${val}</div></div>`;
+  }).join('');
+
+  const diffs=[
+    ['€/lic A período', r1.pA-r2.pA,             false],
+    ['€/lic B período', r1.pB-r2.pB,             false],
+    ['Subtotal sin IVA',r1.sub-r2.sub,            true],
+    [`IVA (${T.iva}%)`, r1.iva-r2.iva,            true],
+  ];
+  document.getElementById('varDetail').innerHTML = diffs.map(([l,v,m])=>
+    `<div class="detail-row"><span class="lbl">${l}</span><span>${diffHtml(v,m)}</span></div>`
+  ).join('');
+
+  const td=r1.total-r2.total, el=document.getElementById('totalVar');
+  if(Math.abs(td)<0.005){el.style.color='#fff';el.textContent='Igual';}
+  else{el.style.color=td>0?'#ff8a80':'#69f0ae';el.textContent=(td>0?'+':'')+eur(td);}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL DE EDICIÓN
+// ─────────────────────────────────────────────────────────────────────────────
+function buildPanel() {
+  const body=document.getElementById('panelBody');
+  body.innerHTML='';
+  body.appendChild(makeGlobalSection());
+
+  [
+    {title:'Agency — Estándar',  key:'agency', color:'#1b4f72', bg:'#d6eaf8', cols:['Mensual','Semestral','Anual']},
+    {title:'Premium — Estándar', key:'premium',color:'#145a32', bg:'#d5f5e3', cols:['Mensual','Semestral','Anual']},
+    {title:'Agency — REMAX',     key:'rmAgn',  color:'#c0392b', bg:'#fdebd0', cols:['Mensual','Semestral','Anual']},
+    {title:'Premium — REMAX',    key:'rmPre',  color:'#6c3483', bg:'#e8daef', cols:['Mensual','Semestral','Anual']},
+  ].forEach(s => body.appendChild(makeTierSection(s)));
+}
+
+function makeGlobalSection() {
+  const d=document.createElement('div');
+  d.className='tarifa-section';
+  d.innerHTML=`
+    <div class="tarifa-title">Configuración general <span class="tarifa-badge" style="background:#eee;color:#555">Global</span></div>
+    <div class="global-grid">
+      <div>
+        <div class="field-label" style="margin-bottom:6px">IVA (%)</div>
+        <input type="number" min="0" max="100" step="0.1" value="${T.iva}" oninput="T.iva=+this.value||0;saveT()">
+      </div>
+    </div>`;
+  return d;
+}
+
+function makeTierSection({title, key, color, bg, cols}) {
+  const d=document.createElement('div');
+  d.className='tarifa-section';
+  let html=`<div class="tarifa-title">${title} <span class="tarifa-badge" style="background:${bg};color:${color}">${key.startsWith('rm')?'REMAX':'Estándar'}</span></div>`;
+  html+=`<table class="tarifa-table"><thead><tr><th>Desde</th><th>Hasta (∞=vacío)</th>`;
+  cols.forEach(c=>html+=`<th>€/lic ${c}</th>`);
+  html+=`<th></th></tr></thead><tbody id="tbody_${key}"></tbody></table>`;
+  html+=`<button class="add-row-btn" onclick="addTier('${key}')">+ Añadir tramo</button>`;
+  d.innerHTML=html;
+  setTimeout(()=>renderRows(key, cols),0);
+  return d;
+}
+
+function renderRows(key) {
+  const tbody=document.getElementById('tbody_'+key);
+  if(!tbody) return;
+  tbody.innerHTML='';
+  T[key].forEach((t,i)=>{
+    const tr=document.createElement('tr');
+    const maxV=t.max>=9999?'':t.max;
+    const semVal = t.sem===null||t.sem===undefined?'':t.sem;
+    tr.innerHTML=`
+      <td><input type="number" min="0" value="${t.min}" oninput="T['${key}'][${i}].min=+this.value||0;saveT()"></td>
+      <td><input type="number" min="0" value="${maxV}" placeholder="∞" oninput="T['${key}'][${i}].max=+this.value||9999;saveT()"></td>
+      <td><input type="number" min="0" step="0.01" value="${t.mes}" oninput="T['${key}'][${i}].mes=+this.value||0;saveT()"></td>
+      <td><input type="number" min="0" step="0.01" value="${semVal}" placeholder="—" oninput="T['${key}'][${i}].sem=this.value===''?null:(+this.value||0);saveT()"></td>
+      <td><input type="number" min="0" step="0.01" value="${t.ano}" oninput="T['${key}'][${i}].ano=+this.value||0;saveT()"></td>
+      <td><button class="del-btn" onclick="delTier('${key}',${i})" title="Eliminar">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function addTier(key) {
+  const last=T[key][T[key].length-1];
+  const newMin=last?(last.max>=9999?last.min+10:last.max+1):1;
+  T[key].push({min:newMin,max:9999,mes:0,sem:null,ano:0});
+  saveT(); renderRows(key);
+}
+function delTier(key,i) {
+  if(T[key].length<=1){alert('Debe quedar al menos un tramo.');return;}
+  T[key].splice(i,1); saveT(); renderRows(key);
+}
+
+function openPanel(){buildPanel();document.getElementById('overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closePanel(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closePanel();}
+
+let _tt;
+function showToast(){
+  const t=document.getElementById('toast'); t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+function setMode(m){
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.toggle('active',+b.dataset.mode===m));
+  document.getElementById('grid').className='grid mode-'+m;
+  document.getElementById('card2').style.display=m>=2?'flex':'none';
+  document.getElementById('cardVar').style.display=m===3?'flex':'none';
+}
+
+render();
+</script>
+</body>
+</html>
