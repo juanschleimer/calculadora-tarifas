@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -276,20 +277,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const ORIG = {
   agency: [
-    {min:1,  max:1,   mes:79, sem:55, ano:40},
-    {min:2,  max:3,   mes:55, sem:45, ano:35},
-    {min:4,  max:4,   mes:43, sem:40, ano:25},
-    {min:5,  max:5,   mes:43, sem:38, ano:25},
-    {min:6,  max:9,   mes:43, sem:38, ano:22},
-    {min:10, max:14,  mes:40, sem:32, ano:20},
-    {min:15, max:9999,mes:38, sem:28, ano:16},
+    {min:1,  max:1, mes:79, sem:71.1, ano:67.15},
+    {min:2,  max:3, mes:55, sem:49.5, ano:46.75},
+    {min:4,  max:9, mes:43, sem:38.7, ano:36.55},
+    {min:10,  max:14, mes:40, sem:36, ano:34},
+    {min:15,  max:9999, mes:38, sem:34.2, ano:32.3},
   ],
   premium: [
-    {min:1,  max:1,   mes:199, sem:149, ano:100},
-    {min:2,  max:2,   mes:120, sem:99,  ano:78},
-    {min:3,  max:3,   mes:108, sem:86,  ano:65},
-    {min:4,  max:4,   mes:108, sem:65,  ano:55},
-    {min:5,  max:9999,mes:95,  sem:60,  ano:49},
+    {min:1,  max:1, mes:199, sem:179.1, ano:169.15},
+    {min:2,  max:2, mes:120, sem:108, ano:102},
+    {min:3,  max:4, mes:108, sem:97.2, ano:91.8},
+    {min:5,  max:9999, mes:95, sem:85.5, ano:80.75},
   ],
   // REMAX escalado
   rmAgn: [
@@ -393,6 +391,24 @@ function readS(n) {
 }
 
 function render() {
+  // Agency 1 seat estándar y Agency REMAX 1-4: solo Anual
+  [1,2].forEach(n => {
+    const tipoA   = document.getElementById('s'+n+'_tipoA').value;
+    const qtyA    = +document.getElementById('s'+n+'_qtyA').value || 0;
+    const acuerdo = document.getElementById('s'+n+'_acuerdo').value;
+    const sel     = document.getElementById('s'+n+'_contrato');
+    const isLocked1 = (tipoA === 'Agency' && acuerdo !== 'REMAX' && qtyA === 1);
+    const isLockedRM = (tipoA === 'Agency' && acuerdo === 'REMAX' && qtyA >= 1 && qtyA <= 4);
+    Array.from(sel.options).forEach(o => {
+      if (o.value === 'Mensual')   o.disabled = isLocked1;
+      if (o.value === 'Semestral') o.disabled = isLocked1 || isLockedRM;
+      if (o.value === 'Anual')     o.disabled = false;
+    });
+    if ((isLocked1 && (sel.value === 'Mensual' || sel.value === 'Semestral')) ||
+        (isLockedRM && sel.value === 'Semestral')) {
+      sel.value = isLocked1 ? 'Anual' : 'Mensual';
+    }
+  });
   const s1=readS(1), s2=readS(2);
   const r1=calcS(s1), r2=calcS(s2);
 
