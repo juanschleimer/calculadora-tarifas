@@ -174,10 +174,10 @@
       </div>
       <div><div class="field-label">Contrato</div>
         <select id="s1_contrato" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
-          <option>Mensual</option><option>Semestral</option><option selected>Anual</option></select></div>
+          <option>Mensual</option><option>Trimestral</option><option>Semestral</option><option selected>Anual</option></select></div>
       <div><div class="field-label">Acuerdo</div>
         <select id="s1_acuerdo" onchange="render()" style="border:1.5px solid rgba(27,79,114,.28);background:rgba(27,79,114,.05)">
-          <option selected>No</option><option>REMAX</option></select></div>
+          <option selected>No</option><option>REMAX</option><option>KW</option><option>E&amp;V</option></select></div>
     </div>
     <div class="div"></div>
     <div class="detail" id="detail1"></div>
@@ -209,10 +209,10 @@
       </div>
       <div><div class="field-label">Contrato</div>
         <select id="s2_contrato" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
-          <option>Mensual</option><option>Semestral</option><option selected>Anual</option></select></div>
+          <option>Mensual</option><option>Trimestral</option><option>Semestral</option><option selected>Anual</option></select></div>
       <div><div class="field-label">Acuerdo</div>
         <select id="s2_acuerdo" onchange="render()" style="border:1.5px solid rgba(20,90,50,.28);background:rgba(20,90,50,.05)">
-          <option>No</option><option selected>REMAX</option></select></div>
+          <option selected>No</option><option>REMAX</option><option>KW</option><option>E&amp;V</option></select></div>
     </div>
     <div class="div"></div>
     <div class="detail" id="detail2"></div>
@@ -243,7 +243,7 @@
   </div>
 </div>
 
-<div class="footer-note">Precios en € sin IVA &nbsp;·&nbsp; IVA 21% incluido en TOTAL &nbsp;·&nbsp; Semestral = precio/lic × qty × 6 meses</div>
+<div class="footer-note">Precios en € sin IVA &nbsp;·&nbsp; IVA 21% incluido en TOTAL &nbsp;·&nbsp; Trimestral = precio/lic × qty × 3 meses &nbsp;·&nbsp; Semestral × 6 &nbsp;·&nbsp; Anual × 12</div>
 
 <!-- MODAL -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
@@ -277,43 +277,75 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const ORIG = {
   agency: [
-    {min:1,max:1,mes:79,sem:71,ano:67},
-    {min:2,max:3,mes:55,sem:50,ano:47},
-    {min:4,max:9,mes:43,sem:39,ano:37},
-    {min:10,max:14,mes:40,sem:36,ano:34},
-    {min:15,max:9999,mes:38,sem:34,ano:32},
+    {min:1,max:1,mes:79,tri:null,sem:71,ano:67},
+    {min:2,max:3,mes:55,tri:null,sem:50,ano:47},
+    {min:4,max:9,mes:43,tri:null,sem:39,ano:37},
+    {min:10,max:14,mes:40,tri:null,sem:36,ano:34},
+    {min:15,max:9999,mes:38,tri:null,sem:34,ano:32},
   ],
   premium: [
-    {min:1,max:1,mes:199,sem:179,ano:169},
-    {min:2,max:2,mes:120,sem:108,ano:102},
-    {min:3,max:4,mes:108,sem:97,ano:92},
-    {min:5,max:9999,mes:95,sem:86,ano:81},
+    {min:1,max:1,mes:199,tri:null,sem:179,ano:169},
+    {min:2,max:2,mes:120,tri:null,sem:108,ano:102},
+    {min:3,max:4,mes:108,tri:null,sem:97,ano:92},
+    {min:5,max:9999,mes:95,tri:null,sem:86,ano:81},
   ],
   rmAgn: [
-    {min:1,max:4,mes:39,sem:null,ano:31},
-    {min:5,max:15,mes:31,sem:26,ano:22},
-    {min:16,max:30,mes:26,sem:22,ano:19},
-    {min:31,max:45,mes:22,sem:19,ano:16},
-    {min:46,max:60,mes:18,sem:15,ano:13},
-    {min:61,max:9999,mes:15,sem:13,ano:11},
+    {min:1,max:4,mes:39,tri:117,sem:null,ano:31},
+    {min:5,max:15,mes:31,tri:93,sem:26,ano:22},
+    {min:16,max:30,mes:26,tri:78,sem:22,ano:19},
+    {min:31,max:45,mes:22,tri:66,sem:19,ano:16},
+    {min:46,max:60,mes:18,tri:54,sem:15,ano:13},
+    {min:61,max:9999,mes:15,tri:45,sem:13,ano:11},
   ],
   rmPre: [
-    {min:1,max:4,mes:66,sem:56,ano:48},
-    {min:5,max:15,mes:56,sem:48,ano:41},
-    {min:16,max:30,mes:48,sem:41,ano:34},
-    {min:31,max:45,mes:41,sem:34,ano:29},
-    {min:46,max:60,mes:34,sem:29,ano:25},
-    {min:61,max:9999,mes:29,sem:25,ano:21},
+    {min:1,max:4,mes:66,tri:199,sem:56,ano:48},
+    {min:5,max:15,mes:56,tri:169,sem:48,ano:41},
+    {min:16,max:30,mes:48,tri:145,sem:41,ano:34},
+    {min:31,max:45,mes:41,tri:124,sem:34,ano:29},
+    {min:46,max:60,mes:34,tri:103,sem:29,ano:25},
+    {min:61,max:9999,mes:29,tri:87,sem:25,ano:21},
+  ],
+  kwAgn: [
+    {min:1,max:4,mes:39,tri:117,sem:null,ano:31},
+    {min:5,max:15,mes:31,tri:93,sem:26,ano:22},
+    {min:16,max:30,mes:26,tri:78,sem:22,ano:19},
+    {min:31,max:45,mes:22,tri:66,sem:19,ano:16},
+    {min:46,max:60,mes:18,tri:54,sem:15,ano:13},
+    {min:61,max:9999,mes:15,tri:45,sem:13,ano:11},
+  ],
+  kwPre: [
+    {min:1,max:4,mes:66,tri:199,sem:56,ano:48},
+    {min:5,max:15,mes:56,tri:169,sem:48,ano:41},
+    {min:16,max:30,mes:48,tri:145,sem:41,ano:34},
+    {min:31,max:45,mes:41,tri:124,sem:34,ano:29},
+    {min:46,max:60,mes:34,tri:103,sem:29,ano:25},
+    {min:61,max:9999,mes:29,tri:87,sem:25,ano:21},
+  ],
+  evAgn: [
+    {min:1,max:4,mes:36,tri:108,sem:null,ano:29},
+    {min:5,max:15,mes:29,tri:86,sem:24,ano:20},
+    {min:16,max:30,mes:24,tri:72,sem:20,ano:18},
+    {min:31,max:45,mes:20,tri:61,sem:18,ano:15},
+    {min:46,max:60,mes:17,tri:50,sem:14,ano:12},
+    {min:61,max:9999,mes:14,tri:42,sem:12,ano:10},
+  ],
+  evPre: [
+    {min:1,max:4,mes:61,tri:184,sem:52,ano:44},
+    {min:5,max:15,mes:52,tri:156,sem:44,ano:38},
+    {min:16,max:30,mes:44,tri:134,sem:38,ano:31},
+    {min:31,max:45,mes:38,tri:114,sem:31,ano:27},
+    {min:46,max:60,mes:31,tri:95,sem:27,ano:23},
+    {min:61,max:9999,mes:27,tri:80,sem:23,ano:19},
   ],
   iva: 21,
 };
 
 function loadT() {
-  try { const s=localStorage.getItem('lystos_t3'); if(s) return JSON.parse(s); } catch(e){}
+  try { const s=localStorage.getItem('lystos_t6'); if(s) return JSON.parse(s); } catch(e){}
   return JSON.parse(JSON.stringify(ORIG));
 }
 function saveT() {
-  try { localStorage.setItem('lystos_t3', JSON.stringify(T)); } catch(e){}
+  try { localStorage.setItem('lystos_t6', JSON.stringify(T)); } catch(e){}
   showToast(); render();
 }
 function resetTarifas() {
@@ -329,43 +361,48 @@ let T = loadT();
 // Devuelve precio POR LICENCIA POR MES (para el display de detalle)
 // El total se multiplica por qty y por los meses del período
 // ─────────────────────────────────────────────────────────────────────────────
+function getTiers(tipo, acuerdo) {
+  if (acuerdo==='REMAX') return tipo==='Agency'?T.rmAgn : tipo==='Premium'?T.rmPre : null;
+  if (acuerdo==='KW')    return tipo==='Agency'?T.kwAgn : tipo==='Premium'?T.kwPre : null;
+  if (acuerdo==='E&V')   return tipo==='Agency'?T.evAgn : tipo==='Premium'?T.evPre : null;
+  return tipo==='Agency'?T.agency : tipo==='Premium'?T.premium : null;
+}
 function getPriceLic(tipo, qty, acuerdo, contrato) {
   if (!qty||qty<=0||!tipo||tipo==='Ninguna') return 0;
-  const tiers = acuerdo==='REMAX'
-    ? (tipo==='Agency'?T.rmAgn : tipo==='Premium'?T.rmPre : null)
-    : (tipo==='Agency'?T.agency: tipo==='Premium'?T.premium: null);
+  const tiers = getTiers(tipo, acuerdo);
   if (!tiers) return 0;
   for (const t of tiers) {
     if (qty>=t.min && qty<=t.max) {
-      if (contrato==='Mensual')   return t.mes;
-      if (contrato==='Semestral') return t.sem !== null ? t.sem : t.mes; // fallback a mes si null
-      if (contrato==='Anual')     return t.ano;
+      if (contrato==='Trimestral') return t.tri !== null ? t.tri : t.mes*3;
+      if (contrato==='Semestral')  return t.sem !== null ? t.sem : t.mes*6;
+      if (contrato==='Anual')      return t.ano !== null ? t.ano : t.mes*12;
+      return t.mes; // Mensual
     }
   }
   return 0;
 }
 
 function meses(contrato) {
-  if (contrato==='Mensual')   return 1;
-  if (contrato==='Semestral') return 6;
-  if (contrato==='Anual')     return 12;
+  if (contrato==='Mensual')    return 1;
+  if (contrato==='Trimestral') return 3;
+  if (contrato==='Semestral')  return 6;
+  if (contrato==='Anual')      return 12;
   return 1;
 }
 
 function calcS(s) {
   const qa=+s.qtyA||0, qb=+s.qtyB||0;
   const hasB = s.tipoB!=='Ninguna'&&qb>0;
+  const m = meses(s.contrato);
+  // pA/pB = price per lic for the full period
   const pA = getPriceLic(s.tipoA, qa, s.acuerdo, s.contrato);
   const pB = hasB ? getPriceLic(s.tipoB, qb, s.acuerdo, s.contrato) : 0;
-  // precio mensual para referencia
+  // mensual reference = mes price (always)
   const pAm = getPriceLic(s.tipoA, qa, s.acuerdo, 'Mensual');
   const pBm = hasB ? getPriceLic(s.tipoB, qb, s.acuerdo, 'Mensual') : 0;
   const mensualRef = qa*pAm + (hasB?qb*pBm:0);
-
-  const m = meses(s.contrato);
-  const sub = (qa*pA + (hasB?qb*pB:0)) * m;
-  const iva  = sub*(T.iva/100);
-  // ahorro vs pagar mensual el mismo periodo
+  const sub = qa*pA + (hasB?qb*pB:0);
+  const iva = sub*(T.iva/100);
   const ahorro = m>1 ? mensualRef*m - sub : 0;
 
   return {pA, pB, mensualRef, sub, iva, total:sub+iva, ahorro, m};
@@ -390,22 +427,30 @@ function readS(n) {
 }
 
 function render() {
-  // Agency 1 seat estándar y Agency REMAX 1-4: solo Anual
+  // Bloqueo: Mensual solo bloqueado para 1 licencia en acuerdos (REMAX/KW/E&V)
+  // Estándar 1 seat Agency: solo Anual
+  // Todo lo demás permitido
   [1,2].forEach(n => {
     const tipoA   = document.getElementById('s'+n+'_tipoA').value;
     const qtyA    = +document.getElementById('s'+n+'_qtyA').value || 0;
     const acuerdo = document.getElementById('s'+n+'_acuerdo').value;
     const sel     = document.getElementById('s'+n+'_contrato');
-    const isLocked1 = (tipoA === 'Agency' && acuerdo !== 'REMAX' && qtyA === 1);
-    const isLockedRM = (tipoA === 'Agency' && acuerdo === 'REMAX' && qtyA >= 1 && qtyA <= 4);
+
+    const isStd1     = (acuerdo === 'No' && tipoA === 'Agency' && qtyA === 1);
+    const isAcuerdo1 = (['REMAX','KW','E&V'].includes(acuerdo) && qtyA === 1);
+
     Array.from(sel.options).forEach(o => {
-      if (o.value === 'Mensual')   o.disabled = isLocked1;
-      if (o.value === 'Semestral') o.disabled = isLocked1 || isLockedRM;
-      if (o.value === 'Anual')     o.disabled = false;
+      o.disabled = false;
+      if (o.value === 'Mensual') o.disabled = isStd1 || isAcuerdo1;
+      if (o.value === 'Trimestral' || o.value === 'Semestral' || o.value === 'Anual') {
+        if (isStd1 && o.value !== 'Anual') o.disabled = true;
+      }
     });
-    if ((isLocked1 && (sel.value === 'Mensual' || sel.value === 'Semestral')) ||
-        (isLockedRM && sel.value === 'Semestral')) {
-      sel.value = isLocked1 ? 'Anual' : 'Mensual';
+
+    const cur = sel.value;
+    if (Array.from(sel.options).find(o=>o.value===cur)?.disabled) {
+      const first = Array.from(sel.options).find(o => !o.disabled);
+      if (first) sel.value = first.value;
     }
   });
   const s1=readS(1), s2=readS(2);
@@ -415,7 +460,7 @@ function render() {
   document.getElementById('sub2').textContent=`${s2.contrato} · ${s2.acuerdo==='REMAX'?'Acuerdo REMAX':'Sin acuerdo'}`;
 
   function rs(r, s, sfx, c) {
-    const periodoLabel = s.contrato==='Mensual'?'mes':s.contrato==='Semestral'?'semestre':'año';
+    const periodoLabel = s.contrato==='Mensual'?'mes':s.contrato==='Trimestral'?'trimestre':s.contrato==='Semestral'?'semestre':'año';
     document.getElementById('detail'+sfx).innerHTML=`
       <div class="detail-row"><span class="lbl">€/lic A · ${periodoLabel}</span><span class="val" style="color:${c}">${eur(r.pA)}</span></div>
       <div class="detail-row"><span class="lbl">€/lic B · ${periodoLabel}</span><span class="val" style="color:${c}">${eur(r.pB)}</span></div>
@@ -473,10 +518,14 @@ function buildPanel() {
   body.appendChild(makeGlobalSection());
 
   [
-    {title:'Agency — Estándar',  key:'agency', color:'#1b4f72', bg:'#d6eaf8', cols:['Mensual','Semestral','Anual']},
-    {title:'Premium — Estándar', key:'premium',color:'#145a32', bg:'#d5f5e3', cols:['Mensual','Semestral','Anual']},
-    {title:'Agency — REMAX',     key:'rmAgn',  color:'#c0392b', bg:'#fdebd0', cols:['Mensual','Semestral','Anual']},
-    {title:'Premium — REMAX',    key:'rmPre',  color:'#6c3483', bg:'#e8daef', cols:['Mensual','Semestral','Anual']},
+    {title:'Agency — Estándar',  key:'agency', color:'#1b4f72', bg:'#d6eaf8'},
+    {title:'Premium — Estándar', key:'premium',color:'#145a32', bg:'#d5f5e3'},
+    {title:'Agency — REMAX',     key:'rmAgn',  color:'#c0392b', bg:'#fdebd0'},
+    {title:'Premium — REMAX',    key:'rmPre',  color:'#6c3483', bg:'#e8daef'},
+    {title:'Agency — KW',        key:'kwAgn',  color:'#b7950b', bg:'#fef9e7'},
+    {title:'Premium — KW',       key:'kwPre',  color:'#b7950b', bg:'#fef9e7'},
+    {title:'Agency — E&V',       key:'evAgn',  color:'#1a5276', bg:'#d6eaf8'},
+    {title:'Premium — E&V',      key:'evPre',  color:'#1a5276', bg:'#d6eaf8'},
   ].forEach(s => body.appendChild(makeTierSection(s)));
 }
 
@@ -497,13 +546,12 @@ function makeGlobalSection() {
 function makeTierSection({title, key, color, bg, cols}) {
   const d=document.createElement('div');
   d.className='tarifa-section';
-  let html=`<div class="tarifa-title">${title} <span class="tarifa-badge" style="background:${bg};color:${color}">${key.startsWith('rm')?'REMAX':'Estándar'}</span></div>`;
-  html+=`<table class="tarifa-table"><thead><tr><th>Desde</th><th>Hasta (∞=vacío)</th>`;
-  cols.forEach(c=>html+=`<th>€/lic ${c}</th>`);
-  html+=`<th></th></tr></thead><tbody id="tbody_${key}"></tbody></table>`;
+  const badge = key.startsWith('rm')?'REMAX':key.startsWith('kw')?'KW':key.startsWith('ev')?'E&V':'Estándar';
+  let html=`<div class="tarifa-title">${title} <span class="tarifa-badge" style="background:${bg};color:${color}">${badge}</span></div>`;
+  html+=`<table class="tarifa-table"><thead><tr><th>Desde</th><th>Hasta</th><th>Mensual</th><th>Trimestral</th><th>Semestral</th><th>Anual</th><th></th></tr></thead><tbody id="tbody_${key}"></tbody></table>`;
   html+=`<button class="add-row-btn" onclick="addTier('${key}')">+ Añadir tramo</button>`;
   d.innerHTML=html;
-  setTimeout(()=>renderRows(key, cols),0);
+  setTimeout(()=>renderRows(key),0);
   return d;
 }
 
@@ -513,14 +561,16 @@ function renderRows(key) {
   tbody.innerHTML='';
   T[key].forEach((t,i)=>{
     const tr=document.createElement('tr');
-    const maxV=t.max>=9999?'':t.max;
+    const maxV  = t.max>=9999?'':t.max;
+    const triVal = t.tri===null||t.tri===undefined?'':t.tri;
     const semVal = t.sem===null||t.sem===undefined?'':t.sem;
     tr.innerHTML=`
       <td><input type="number" min="0" value="${t.min}" oninput="T['${key}'][${i}].min=+this.value||0;saveT()"></td>
       <td><input type="number" min="0" value="${maxV}" placeholder="∞" oninput="T['${key}'][${i}].max=+this.value||9999;saveT()"></td>
-      <td><input type="number" min="0" step="0.01" value="${t.mes}" oninput="T['${key}'][${i}].mes=+this.value||0;saveT()"></td>
-      <td><input type="number" min="0" step="0.01" value="${semVal}" placeholder="—" oninput="T['${key}'][${i}].sem=this.value===''?null:(+this.value||0);saveT()"></td>
-      <td><input type="number" min="0" step="0.01" value="${t.ano}" oninput="T['${key}'][${i}].ano=+this.value||0;saveT()"></td>
+      <td><input type="number" min="0" step="1" value="${t.mes}" oninput="T['${key}'][${i}].mes=+this.value||0;saveT()"></td>
+      <td><input type="number" min="0" step="1" value="${triVal}" placeholder="—" oninput="T['${key}'][${i}].tri=this.value===''?null:(+this.value||0);saveT()"></td>
+      <td><input type="number" min="0" step="1" value="${semVal}" placeholder="—" oninput="T['${key}'][${i}].sem=this.value===''?null:(+this.value||0);saveT()"></td>
+      <td><input type="number" min="0" step="1" value="${t.ano}" oninput="T['${key}'][${i}].ano=+this.value||0;saveT()"></td>
       <td><button class="del-btn" onclick="delTier('${key}',${i})" title="Eliminar">×</button></td>`;
     tbody.appendChild(tr);
   });
@@ -529,7 +579,7 @@ function renderRows(key) {
 function addTier(key) {
   const last=T[key][T[key].length-1];
   const newMin=last?(last.max>=9999?last.min+10:last.max+1):1;
-  T[key].push({min:newMin,max:9999,mes:0,sem:null,ano:0});
+  T[key].push({min:newMin,max:9999,mes:0,tri:null,sem:null,ano:0});
   saveT(); renderRows(key);
 }
 function delTier(key,i) {
